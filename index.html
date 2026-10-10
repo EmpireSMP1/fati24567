@@ -1,0 +1,1187 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>❌⭕ دوز ULTIMATE</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    width: 100%; min-height: 100vh;
+    background: radial-gradient(circle at center, #1a0033 0%, #000 100%);
+    overflow-x: hidden;
+    font-family: Tahoma, Arial, sans-serif;
+    color: #fff;
+    user-select: none;
+  }
+  .screen { position: fixed; inset: 0; display: flex; flex-direction: column;
+    justify-content: center; align-items: center; padding: 20px;
+    text-align: center; z-index: 10; overflow-y: auto; }
+  .off { display: none !important; }
+  h1 { font-size: 40px; margin-bottom: 15px;
+       background: linear-gradient(135deg, #03dac6, #bb86fc, #ff6b6b, #ffb74d);
+       -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+       background-clip: text; letter-spacing: 3px; font-weight: 900;
+       filter: drop-shadow(0 0 30px rgba(187,134,252,0.7)); }
+  h2 { font-size: 22px; margin: 10px 0; color: #ffb74d; }
+  p { font-size: 14px; color: #ccc; margin: 6px 0; line-height: 1.8; max-width: 700px; }
+  button { margin: 5px 4px; padding: 12px 26px; font-size: 14px; font-weight: bold;
+    font-family: inherit; background: linear-gradient(135deg, #bb86fc, #6200ea);
+    color: #fff; border: none; border-radius: 12px; cursor: pointer;
+    box-shadow: 0 0 25px rgba(187,134,252,0.6); transition: 0.25s; letter-spacing: 1px; }
+  button:hover { transform: translateY(-3px); box-shadow: 0 0 45px rgba(187,134,252,1); }
+  button:active { transform: scale(0.97); }
+  button.green { background: linear-gradient(135deg, #03dac6, #00796b); }
+  button.gold { background: linear-gradient(135deg, #ffb74d, #e65100); }
+  button.red { background: linear-gradient(135deg, #ff6b6b, #c62828); }
+  button.secondary { background: #333; box-shadow: none; }
+  button.small { padding: 7px 15px; font-size: 12px; }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+  textarea { width: 100%; max-width: 600px; padding: 12px;
+    font-family: monospace; font-size: 11px; background: #111; color: #4caf50;
+    border: 2px solid #444; border-radius: 10px; outline: none;
+    margin: 6px 0; resize: vertical; min-height: 70px; direction: ltr; }
+
+  /* GAME UI */
+  .hud { display: flex; justify-content: center; align-items: center; gap: 12px;
+    width: 100%; max-width: 720px; margin-bottom: 8px; }
+  .player-score { flex: 1; padding: 8px; border-radius: 12px;
+    background: #111; border: 2px solid #333; transition: 0.3s;
+    position: relative; overflow: hidden; }
+  .player-score.active { transform: scale(1.08); }
+  .player-score.p1 { color: #03dac6; }
+  .player-score.p2 { color: #ff6b6b; }
+  .player-score.active.p1 { border-color: #03dac6; box-shadow: 0 0 25px #03dac6; background: rgba(3,218,198,0.1); }
+  .player-score.active.p2 { border-color: #ff6b6b; box-shadow: 0 0 25px #ff6b6b; background: rgba(255,107,107,0.1); }
+  .player-label { font-size: 12px; opacity: 0.85; }
+  .score-value { font-size: 26px; font-weight: bold; transition: 0.3s; }
+  .score-value.pop { animation: scorePop 0.5s; }
+  @keyframes scorePop { 0% { transform: scale(1); }
+    50% { transform: scale(1.5); color: #ffeb3b; } 100% { transform: scale(1); } }
+  .vs { font-size: 22px; color: #666; }
+  .info-bar { display: flex; gap: 20px; font-size: 13px; color: #aaa;
+    margin-bottom: 6px; align-items: center; flex-wrap: wrap; justify-content: center; }
+  .info-bar span { color: #ffb74d; font-weight: bold; }
+  .combo-badge { display: inline-block; padding: 3px 12px; border-radius: 15px;
+    background: linear-gradient(135deg, #ff6b6b, #ffb74d);
+    color: #fff; font-weight: bold; font-size: 12px;
+    animation: comboPulse 0.5s infinite alternate; }
+  @keyframes comboPulse { from { transform: scale(1); }
+    to { transform: scale(1.1); box-shadow: 0 0 25px rgba(255,107,107,1); } }
+  .wildcard-badge { display: inline-block; padding: 3px 12px; border-radius: 15px;
+    background: linear-gradient(135deg, #bb86fc, #ff6b6b);
+    color: #fff; font-weight: bold; font-size: 12px; }
+  .timer-bar { width: 100%; max-width: 400px; height: 8px;
+    background: rgba(255,255,255,0.1); border-radius: 4px; margin-bottom: 10px;
+    overflow: hidden; display: none; }
+  .timer-bar.active { display: block; }
+  .timer-fill { height: 100%; width: 100%;
+    background: linear-gradient(90deg, #03dac6, #ffb74d, #ff6b6b);
+    transition: width 0.1s linear; }
+  .turn-indicator { font-size: 14px; font-weight: bold; padding: 6px 20px;
+    border-radius: 20px; background: rgba(255,183,77,0.15); color: #ffb74d;
+    border: 1px solid rgba(255,183,77,0.4); margin-bottom: 12px; min-height: 28px; }
+
+  /* BOARD */
+  .board {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    width: min(360px, 88vw);
+    margin: 6px auto 0;
+  }
+  .cell {
+    aspect-ratio: 1 / 1;
+    background: rgba(255,255,255,0.04);
+    border: 2px solid #3a3a4a;
+    border-radius: 16px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 58px; font-weight: 900; line-height: 1;
+    cursor: pointer; transition: 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .cell:hover:not(.taken):not(.locked) {
+    background: rgba(187,134,252,0.12);
+    border-color: #bb86fc;
+    transform: translateY(-3px);
+    box-shadow: 0 0 25px rgba(187,134,252,0.5);
+  }
+  .cell.taken { cursor: default; }
+  .cell.x { color: #03dac6; border-color: rgba(3,218,198,0.55);
+    text-shadow: 0 0 22px #03dac6; background: rgba(3,218,198,0.07); }
+  .cell.o { color: #ff6b6b; border-color: rgba(255,107,107,0.55);
+    text-shadow: 0 0 22px #ff6b6b; background: rgba(255,107,107,0.07); }
+  .cell.locked { opacity: 0.22; cursor: not-allowed; border-style: dashed; }
+  .cell.locked::before { content: '🔒'; position: absolute; font-size: 20px; opacity: 0.9; }
+  .cell.golden {
+    border-color: #ffeb3b;
+    box-shadow: inset 0 0 22px rgba(255,235,59,0.35), 0 0 18px rgba(255,235,59,0.35);
+  }
+  .cell.golden::after { content: '✨'; position: absolute; top: 3px; left: 7px;
+    font-size: 16px; animation: badgeFloat 1.6s infinite ease-in-out; }
+  @keyframes badgeFloat {
+    0%,100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-4px) scale(1.1); } }
+  .cell.win {
+    animation: winPulse 0.7s infinite alternate;
+    border-color: #ffeb3b !important;
+    background: rgba(255,235,59,0.18) !important;
+    color: #fff !important;
+    text-shadow: 0 0 25px #ffeb3b !important;
+  }
+  @keyframes winPulse {
+    from { transform: scale(1); box-shadow: 0 0 10px rgba(255,235,59,0.5); }
+    to { transform: scale(1.07); box-shadow: 0 0 35px rgba(255,235,59,1); } }
+  .cell.pop { animation: cellPop 0.35s ease-out; }
+  @keyframes cellPop { 0% { transform: scale(0.35); } 60% { transform: scale(1.18); } 100% { transform: scale(1); } }
+
+  .message { margin-top: 15px; font-size: 22px; font-weight: bold;
+    min-height: 40px; text-shadow: 0 0 20px currentColor; letter-spacing: 2px; }
+  .message.correct { color: #4caf50; animation: msgBounce 0.6s; }
+  .message.wrong { color: #f44336; animation: msgShake 0.5s; }
+  .message.info { color: #ffb74d; }
+  @keyframes msgBounce { 0% { transform: scale(0.3) rotate(-15deg); }
+    50% { transform: scale(1.3) rotate(5deg); } 100% { transform: scale(1) rotate(0); } }
+  @keyframes msgShake { 0%,100% { transform: translateX(0); }
+    25% { transform: translateX(-15px); } 75% { transform: translateX(15px); } }
+
+  .trophy { font-size: 100px; margin: 10px 0; animation: float 1.5s infinite; }
+  @keyframes float { 0%,100% { transform: translateY(0) rotate(-5deg); }
+    50% { transform: translateY(-25px) rotate(5deg); } }
+  .result-text { font-size: 18px; margin: 15px 0; color: #ddd; line-height: 2; }
+
+  .emoji-bar {
+    position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+    display: flex; gap: 8px; padding: 8px 12px;
+    background: rgba(0,0,0,0.8); border-radius: 25px;
+    border: 1px solid #444; z-index: 50;
+  }
+  .emoji-btn { font-size: 22px; padding: 5px 10px; cursor: pointer;
+    border-radius: 50%; transition: 0.2s; background: transparent;
+    border: none; }
+  .emoji-btn:hover { transform: scale(1.3); background: rgba(255,255,255,0.1); }
+
+  .floating-emoji {
+    position: fixed; font-size: 80px; z-index: 400; pointer-events: none;
+    animation: emojiFloat 2.5s ease-out forwards;
+  }
+  @keyframes emojiFloat {
+    0% { transform: translate(-50%, 0) scale(0.5); opacity: 0; }
+    20% { transform: translate(-50%, -40px) scale(1.3); opacity: 1; }
+    100% { transform: translate(-50%, -300px) scale(1); opacity: 0; } }
+
+  #toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+    padding: 12px 25px; background: rgba(0,0,0,0.9); border-radius: 12px;
+    font-size: 14px; z-index: 999; border: 1px solid #444; opacity: 0;
+    transition: 0.3s; pointer-events: none; max-width: 90%; }
+  #toast.show { opacity: 1; bottom: 50px; }
+  #toast.err { border-color: #ff6b6b; color: #ff6b6b; }
+  #toast.ok { border-color: #4caf50; color: #4caf50; }
+  #err { position: fixed; bottom: 0; left: 0; right: 0;
+    background: #b71c1c; color: #fff; padding: 8px;
+    font-size: 11px; font-family: monospace; z-index: 9999; display: none; }
+
+  #comboAnnounce {
+    position: fixed; top: 30%; left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    font-size: 60px; font-weight: 900;
+    background: linear-gradient(135deg, #ffeb3b, #ff6b6b);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text; filter: drop-shadow(0 0 30px #ff6b6b);
+    z-index: 300; pointer-events: none; opacity: 0; letter-spacing: 5px; }
+  #comboAnnounce.show { animation: comboAnn 1.5s ease-out; }
+  @keyframes comboAnn {
+    0% { transform: translate(-50%,-50%) scale(0.2) rotate(-20deg); opacity: 0; }
+    20% { transform: translate(-50%,-50%) scale(1.4) rotate(5deg); opacity: 1; }
+    40%,80% { transform: translate(-50%,-50%) scale(1) rotate(0); opacity: 1; }
+    100% { transform: translate(-50%,-50%) scale(1.5) rotate(0); opacity: 0; } }
+
+  .shake { animation: screenShake 0.4s; }
+  @keyframes screenShake {
+    0%,100% { transform: translate(0,0); }
+    20% { transform: translate(-8px,5px); }
+    40% { transform: translate(8px,-5px); }
+    60% { transform: translate(-5px,8px); }
+    80% { transform: translate(5px,-8px); } }
+
+  .box { background: rgba(255,255,255,0.04); border: 1px solid #444;
+    border-radius: 12px; padding: 15px; max-width: 650px; width: 100%; margin: 10px 0; }
+  .box h3 { font-size: 13px; color: #ffb74d; margin-bottom: 8px; }
+  .step-num { display: inline-block; width: 22px; height: 22px; line-height: 22px;
+    background: #bb86fc; color: #fff; border-radius: 50%; margin-left: 5px; font-size: 12px; }
+  .status { font-size: 13px; color: #ffb74d; margin: 8px 0; min-height: 20px; }
+  .status.ok { color: #4caf50; }
+  .status.err { color: #ff6b6b; }
+
+  .menu-buttons {
+    display: flex; flex-direction: column; gap: 12px;
+    width: 100%; max-width: 380px; margin-top: 20px;
+  }
+  .menu-buttons button {
+    width: 100%; margin: 0; padding: 16px;
+    font-size: 15px;
+  }
+</style>
+</head>
+<body>
+
+<!-- ========== MENU ========== -->
+<div class="screen" id="menuScreen">
+  <h1>❌⭕ دوز ULTIMATE</h1>
+  <p>سه تا در یک ردیف بچین و ببر! (اولین نفر ۳ دست می‌بره)</p>
+
+  <div class="menu-buttons">
+    <button id="soloBtn" class="green">تکنفره با کامپیوتر</button>
+    <button id="localBtn" class="gold">۲ نفره همین کامپیوتر</button>
+    <button id="hostBtn">ساخت اتاق (میزبان) 🎮</button>
+    <button id="joinBtn">ورود به اتاق (مهمان) 🚪</button>
+  </div>
+</div>
+
+<!-- ========== LOBBY ========== -->
+<div class="screen off" id="lobbyScreen">
+  <h1 id="lobbyTitle">🎮 اتاق بازی</h1>
+  <div id="hostView" class="box" style="display:none;">
+    <h3><span class="step-num">۱</span> این کد رو برای دوستت بفرست:</h3>
+    <textarea id="offerCode" readonly placeholder="..."></textarea>
+    <button class="small" id="copyOfferBtn">📋 کپی</button>
+    <div style="margin-top:15px;">
+      <h3><span class="step-num">۲</span> کد پاسخ دوستت رو پیست کن:</h3>
+      <textarea id="answerInput" placeholder="..."></textarea>
+      <button class="green" id="processAnswerBtn">🔗 اتصال</button>
+    </div>
+    <div class="status" id="hostStatus">آماده‌سازی...</div>
+  </div>
+  <div id="guestView" class="box" style="display:none;">
+    <h3><span class="step-num">۱</span> کد دعوت رو پیست کن:</h3>
+    <textarea id="offerInput" placeholder="..."></textarea>
+    <button class="green" id="processOfferBtn">⚙️ پردازش</button>
+    <div id="answerBox" style="display:none;margin-top:15px;">
+      <h3><span class="step-num">۲</span> این رو برای میزبان بفرست:</h3>
+      <textarea id="answerCode" readonly></textarea>
+      <button class="small" id="copyAnswerBtn">📋 کپی</button>
+    </div>
+    <div class="status" id="guestStatus">منتظر...</div>
+  </div>
+  <button id="cancelLobbyBtn" class="secondary small" style="margin-top:20px;">انصراف</button>
+</div>
+
+<!-- ========== GAME ========== -->
+<div class="screen off" id="gameScreen">
+  <div class="hud">
+    <div class="player-score p1" id="p1Hud">
+      <div class="player-label">❌ <span id="p1Name">بازیکن ۱</span></div>
+      <div class="score-value" id="p1ScoreVal">0</div>
+    </div>
+    <div class="vs">VS</div>
+    <div class="player-score p2" id="p2Hud">
+      <div class="player-label">⭕ <span id="p2Name">بازیکن ۲</span></div>
+      <div class="score-value" id="p2ScoreVal">0</div>
+    </div>
+  </div>
+  <div class="info-bar">
+    <div>دست: <span id="roundDisplay">1</span></div>
+    <div>برد لازم: <span id="targetDisplay">3</span></div>
+    <div id="comboBox" style="display:none;"><span class="combo-badge" id="comboBadge">🔥 0x</span></div>
+    <div id="wildBox" style="display:none;"><span class="wildcard-badge" id="wildBadge">🌟 WILD</span></div>
+  </div>
+  <div class="timer-bar" id="timerBar"><div class="timer-fill" id="timerFill"></div></div>
+  <div class="turn-indicator" id="turnIndicator">...</div>
+  <div class="board" id="board"></div>
+  <div class="message" id="message"></div>
+  <div class="emoji-bar">
+    <button class="emoji-btn" data-e="😂">😂</button>
+    <button class="emoji-btn" data-e="😎">😎</button>
+    <button class="emoji-btn" data-e="🔥">🔥</button>
+    <button class="emoji-btn" data-e="👏">👏</button>
+    <button class="emoji-btn" data-e="💀">💀</button>
+    <button class="emoji-btn" data-e="🤯">🤯</button>
+    <button class="emoji-btn" data-e="🎉">🎉</button>
+    <button class="emoji-btn" data-e="❤️">❤️</button>
+  </div>
+</div>
+
+<!-- ========== RESULT ========== -->
+<div class="screen off" id="resultScreen">
+  <h1 id="resultTitle">🏆 بردی!</h1>
+  <div class="trophy" id="trophy">🏆</div>
+  <div class="result-text" id="resultText"></div>
+  <button id="againBtn" class="green">بازی مجدد</button>
+  <button id="menuBtn" class="secondary">منوی اصلی</button>
+</div>
+
+<div id="comboAnnounce"></div>
+<div id="toast"></div>
+<div id="err"></div>
+
+<script>
+window.addEventListener('error', function(e) {
+  var el = document.getElementById('err');
+  el.style.display = 'block';
+  el.textContent = '❌ ' + e.message + ' (خط ' + e.lineno + ')';
+});
+
+function $(id) { return document.getElementById(id); }
+function showScreen(id) {
+  var s = document.querySelectorAll('.screen');
+  for (var i = 0; i < s.length; i++) s[i].classList.add('off');
+  $(id).classList.remove('off');
+}
+function toast(msg, type) {
+  var t = $('toast');
+  t.textContent = msg;
+  t.className = 'show ' + (type || '');
+  setTimeout(function() { t.className = type || ''; }, 3000);
+}
+
+// ============ AUDIO ============
+var AC = null;
+function initAudio() { try { if (!AC) AC = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {} }
+function tone(f, d, t, v, delay) {
+  if (!AC) return;
+  try {
+    var t0 = AC.currentTime + (delay || 0);
+    var o = AC.createOscillator(), g = AC.createGain();
+    o.type = t || 'sine'; o.frequency.value = f;
+    g.gain.setValueAtTime(v || 0.05, t0);
+    g.gain.exponentialRampToValueAtTime(0.001, t0 + d);
+    o.connect(g); g.connect(AC.destination);
+    o.start(t0); o.stop(t0 + d);
+  } catch(e) {}
+}
+var S = {
+  place: function() { tone(520, 0.07, 'triangle', 0.07); },
+  correct: function() { tone(600, 0.1, 'sine', 0.08);
+    setTimeout(function() { tone(900, 0.15, 'sine', 0.08); }, 100);
+    setTimeout(function() { tone(1200, 0.2, 'sine', 0.08); }, 220); },
+  wrong: function() { tone(250, 0.15, 'sawtooth', 0.1);
+    setTimeout(function() { tone(150, 0.25, 'sawtooth', 0.1); }, 150); },
+  combo: function() { tone(800, 0.06); setTimeout(function() { tone(1100, 0.08); }, 60);
+    setTimeout(function() { tone(1400, 0.1); }, 120); },
+  golden: function() { tone(523, 0.08); tone(659, 0.08, 'sine', 0.05, 0.08);
+    tone(784, 0.08, 'sine', 0.05, 0.16); tone(1047, 0.3, 'sine', 0.08, 0.24); },
+  win: function() { tone(523, 0.15); setTimeout(function() { tone(659, 0.15); }, 130);
+    setTimeout(function() { tone(784, 0.15); }, 260);
+    setTimeout(function() { tone(1047, 0.5); }, 400); },
+  lose: function() { tone(392, 0.3, 'sawtooth', 0.08);
+    setTimeout(function() { tone(294, 0.5, 'sawtooth', 0.08); }, 300); }
+};
+
+// ============ EFFECTS ============
+function spawnParticles(x, y, count, colors) {
+  colors = colors || ['#ffeb3b', '#ff6b6b', '#03dac6', '#bb86fc'];
+  for (var i = 0; i < count; i++) {
+    var p = document.createElement('div');
+    p.style.position = 'fixed';
+    p.style.left = x + 'px'; p.style.top = y + 'px';
+    var angle = Math.random() * Math.PI * 2;
+    var dist = 80 + Math.random() * 150;
+    p.style.setProperty('--px', Math.cos(angle) * dist + 'px');
+    p.style.setProperty('--py', Math.sin(angle) * dist + 'px');
+    p.style.background = colors[Math.floor(Math.random() * colors.length)];
+    p.style.boxShadow = '0 0 20px ' + p.style.background;
+    p.style.width = p.style.height = (6 + Math.random() * 10) + 'px';
+    p.style.borderRadius = '50%';
+    p.style.zIndex = '400';
+    p.style.pointerEvents = 'none';
+    p.style.animation = 'particleFly 0.8s ease-out forwards';
+    document.body.appendChild(p);
+    setTimeout((function(el) { return function() { if (el.parentNode) el.parentNode.removeChild(el); }; })(p), 800);
+  }
+}
+function spawnConfetti(count) {
+  var colors = ['#ff6b6b', '#03dac6', '#bb86fc', '#ffb74d', '#ffeb3b', '#4caf50'];
+  for (var i = 0; i < count; i++) {
+    var c = document.createElement('div');
+    c.style.position = 'fixed'; c.style.width = '10px'; c.style.height = '15px';
+    c.style.left = Math.random() * 100 + 'vw'; c.style.top = '-20px';
+    c.style.background = colors[Math.floor(Math.random() * colors.length)];
+    c.style.zIndex = '500'; c.style.pointerEvents = 'none';
+    c.style.animation = 'confettiFall 3s linear forwards';
+    c.style.animationDelay = (Math.random() * 0.5) + 's';
+    document.body.appendChild(c);
+    setTimeout((function(el) { return function() { if (el.parentNode) el.parentNode.removeChild(el); }; })(c), 3500);
+  }
+}
+var styleEl = document.createElement('style');
+styleEl.textContent =
+  '@keyframes confettiFall { 0% { transform: translateY(-10vh) rotate(0deg); opacity: 1; } 100% { transform: translateY(110vh) rotate(720deg); opacity: 0; } } ' +
+  '@keyframes particleFly { 0% { transform: translate(0,0) scale(1); opacity: 1; } 100% { transform: translate(var(--px), var(--py)) scale(0); opacity: 0; } }';
+document.head.appendChild(styleEl);
+
+function screenShake() {
+  document.body.classList.add('shake');
+  setTimeout(function() { document.body.classList.remove('shake'); }, 400);
+}
+function showCombo(text) {
+  var el = $('comboAnnounce');
+  el.textContent = text;
+  el.classList.remove('show');
+  void el.offsetWidth;
+  el.classList.add('show');
+}
+function spawnFloatingEmoji(emoji, fromSide) {
+  var el = document.createElement('div');
+  el.className = 'floating-emoji';
+  el.textContent = emoji;
+  el.style.left = fromSide === 'left' ? '25%' : '75%';
+  el.style.bottom = '100px';
+  document.body.appendChild(el);
+  setTimeout(function() { if (el.parentNode) el.parentNode.removeChild(el); }, 2500);
+}
+
+// ============ GAME STATE ============
+var GS = {
+  mode: 'solo',
+  pc: null, dc: null,
+  myRole: 'p1', isHost: false,
+  oppName: 'حریف', oppAvatar: '👤',
+  board: [null, null, null, null, null, null, null, null, null],
+  turn: 'p1',
+  scores: { p1: 0, p2: 0 },
+  targetScore: 3,
+  round: 0,
+  phase: 'idle',
+  gameOverFlag: false,
+  combos: { p1: 0, p2: 0 },
+  timerId: null, timerValue: 100,
+  wildcard: null,
+  lockedCells: [],
+  goldenCell: -1,
+  starter: 'p1',
+  cellEls: []
+};
+
+var LINES = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+var boardEl = $('board');
+var msgEl = $('message');
+
+var WILDCARD_NAMES = { speed: '⚡ سرعت', bonus: '💎 جایزه', lock: '🔒 قفل' };
+
+function pickWildcard() {
+  var options = ['speed', 'bonus', 'lock'];
+  return options[Math.floor(Math.random() * options.length)];
+}
+
+function shuffleArr(a) {
+  for (var i = a.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var t = a[i]; a[i] = a[j]; a[j] = t;
+  }
+  return a;
+}
+
+function renderBoard() {
+  boardEl.innerHTML = '';
+  GS.cellEls = [];
+  for (var i = 0; i < 9; i++) {
+    (function(idx) {
+      var el = document.createElement('div');
+      el.className = 'cell';
+      el.addEventListener('click', function() { onCellClick(idx); });
+      boardEl.appendChild(el);
+      GS.cellEls.push(el);
+    })(i);
+  }
+  updateBoardUI();
+}
+
+function updateBoardUI() {
+  for (var i = 0; i < 9; i++) {
+    var el = GS.cellEls[i];
+    if (!el) continue;
+    var v = GS.board[i];
+    var cls = 'cell';
+    if (v) cls += (v === 'X' ? ' x taken' : ' o taken');
+    if (!v && GS.lockedCells.indexOf(i) !== -1) cls += ' locked';
+    if (!v && i === GS.goldenCell) cls += ' golden';
+    el.className = cls;
+    el.textContent = v || '';
+  }
+}
+
+function winnerOf(b) {
+  for (var i = 0; i < LINES.length; i++) {
+    var l = LINES[i];
+    if (b[l[0]] && b[l[0]] === b[l[1]] && b[l[0]] === b[l[2]]) return { sym: b[l[0]], line: l };
+  }
+  return null;
+}
+
+function isFull(b) {
+  for (var i = 0; i < 9; i++) {
+    if (!b[i] && GS.lockedCells.indexOf(i) === -1) return false;
+  }
+  return true;
+}
+
+// ============ HUD ============
+function updateHUD() {
+  $('p1ScoreVal').textContent = GS.scores.p1;
+  $('p2ScoreVal').textContent = GS.scores.p2;
+  $('roundDisplay').textContent = Math.max(1, GS.round);
+  $('targetDisplay').textContent = GS.targetScore;
+
+  $('p1Hud').classList.remove('active');
+  $('p2Hud').classList.remove('active');
+  if (!GS.gameOverFlag && GS.phase === 'playing') $(GS.turn + 'Hud').classList.add('active');
+
+  if (GS.mode === 'solo') {
+    $('p1Name').textContent = 'شما';
+    $('p2Name').textContent = 'کامپیوتر';
+  } else if (GS.mode === 'local') {
+    $('p1Name').textContent = 'بازیکن ۱';
+    $('p2Name').textContent = 'بازیکن ۲';
+  } else {
+    $('p1Name').textContent = GS.isHost ? 'شما' : GS.oppName;
+    $('p2Name').textContent = GS.isHost ? GS.oppName : 'شما';
+  }
+
+  var ti = $('turnIndicator');
+  if (GS.gameOverFlag) ti.textContent = '';
+  else if (GS.phase === 'playing') {
+    if (GS.mode === 'local') {
+      ti.textContent = GS.turn === 'p1' ? '❌ نوبت بازیکن ۱' : '⭕ نوبت بازیکن ۲';
+    } else {
+      var mine = (GS.mode !== 'online') || (GS.turn === GS.myRole);
+      ti.textContent = mine ? '👉 نوبت توئه!' : '⏳ نوبت حریف...';
+    }
+  } else if (GS.phase === 'roundover') {
+    ti.textContent = '🎬 پایان دست';
+  } else {
+    ti.textContent = 'آماده...';
+  }
+
+  var c = GS.combos[GS.turn] || 0;
+  if (c >= 2 && GS.phase === 'playing') {
+    $('comboBox').style.display = 'block';
+    $('comboBadge').textContent = '🔥 ' + c + 'x';
+  } else {
+    $('comboBox').style.display = 'none';
+  }
+
+  if (GS.wildcard) {
+    $('wildBox').style.display = 'block';
+    $('wildBadge').textContent = WILDCARD_NAMES[GS.wildcard] || '🌟 WILD';
+  } else {
+    $('wildBox').style.display = 'none';
+  }
+}
+
+// ============ TIMER ============
+function startTimer() {
+  stopTimer();
+  if (GS.phase !== 'playing' || GS.gameOverFlag) return;
+
+  var humanTurn;
+  if (GS.mode === 'solo') humanTurn = (GS.turn === 'p1');
+  else if (GS.mode === 'local') humanTurn = true;
+  else humanTurn = (GS.turn === GS.myRole);
+
+  if (!humanTurn) return;
+
+  $('timerBar').classList.add('active');
+  GS.timerValue = 100;
+  $('timerFill').style.width = '100%';
+
+  var total = (GS.wildcard === 'speed') ? 7 : 12;
+  var dec = 100 / (total * 10);
+
+  GS.timerId = setInterval(function() {
+    if (GS.phase !== 'playing' || GS.gameOverFlag) { stopTimer(); return; }
+    GS.timerValue -= dec;
+    $('timerFill').style.width = Math.max(0, GS.timerValue) + '%';
+    if (GS.timerValue <= 0) {
+      stopTimer();
+      msgEl.textContent = '⏰ زمان تموم شد!';
+      msgEl.className = 'message wrong';
+      autoPlay();
+    }
+  }, 100);
+}
+
+function stopTimer() {
+  if (GS.timerId) { clearInterval(GS.timerId); GS.timerId = null; }
+  $('timerBar').classList.remove('active');
+}
+
+function autoPlay() {
+  var pool = [];
+  for (var i = 0; i < 9; i++) {
+    if (!GS.board[i] && GS.lockedCells.indexOf(i) === -1) pool.push(i);
+  }
+  if (!pool.length) return;
+  makeMove(pool[Math.floor(Math.random() * pool.length)]);
+}
+
+// ============ MOVES ============
+function onCellClick(i) {
+  if (GS.phase !== 'playing' || GS.gameOverFlag) return;
+  if (GS.board[i]) return;
+  if (GS.lockedCells.indexOf(i) !== -1) return;
+  if (GS.mode === 'solo' && GS.turn !== 'p1') return;
+  if (GS.mode === 'online' && GS.turn !== GS.myRole) return;
+  makeMove(i);
+}
+
+function makeMove(i) {
+  if (GS.phase !== 'playing' || GS.gameOverFlag) return;
+  if (GS.board[i] || GS.lockedCells.indexOf(i) !== -1) return;
+
+  stopTimer();
+  var sym = (GS.turn === 'p1') ? 'X' : 'O';
+  GS.board[i] = sym;
+  paintCell(i, sym);
+  S.place();
+
+  if (GS.mode === 'online') sendMsg({ type: 'move', index: i, by: GS.turn });
+
+  var w = winnerOf(GS.board);
+  if (w) { roundEnd(GS.turn, w.line); return; }
+  if (isFull(GS.board)) { roundEnd(null, null); return; }
+
+  GS.turn = (GS.turn === 'p1') ? 'p2' : 'p1';
+  updateHUD();
+  afterTurn();
+}
+
+function paintCell(i, sym) {
+  var el = GS.cellEls[i];
+  if (!el) return;
+  el.className = 'cell ' + (sym === 'X' ? 'x' : 'o') + ' taken pop';
+  el.textContent = sym;
+  setTimeout(function() { if (el.className.indexOf('pop') !== -1) el.classList.remove('pop'); }, 400);
+}
+
+function afterTurn() {
+  if (GS.gameOverFlag || GS.phase !== 'playing') return;
+  if (GS.mode === 'solo' && GS.turn === 'p2') {
+    $('timerBar').classList.remove('active');
+    setTimeout(aiMove, 550 + Math.random() * 450);
+    return;
+  }
+  startTimer();
+}
+
+// ============ AI ============
+function availCells(b) {
+  var a = [];
+  for (var i = 0; i < 9; i++) {
+    if (!b[i] && GS.lockedCells.indexOf(i) === -1) a.push(i);
+  }
+  return a;
+}
+
+function minimax(b, me, turn, depth) {
+  var w = winnerOf(b);
+  if (w) return w.sym === me ? (10 - depth) : (depth - 10);
+  var av = availCells(b);
+  if (!av.length) return 0;
+  var best = (turn === me) ? -Infinity : Infinity;
+  for (var i = 0; i < av.length; i++) {
+    b[av[i]] = turn;
+    var sc = minimax(b, me, turn === 'X' ? 'O' : 'X', depth + 1);
+    b[av[i]] = null;
+    if (turn === me) { if (sc > best) best = sc; }
+    else { if (sc < best) best = sc; }
+  }
+  return best;
+}
+
+function bestMove(b, me) {
+  var av = availCells(b);
+  if (!av.length) return -1;
+  if (Math.random() < 0.12) return av[Math.floor(Math.random() * av.length)];
+  var best = -Infinity, bestIdx = av[0];
+  var opp = (me === 'X') ? 'O' : 'X';
+  for (var i = 0; i < av.length; i++) {
+    b[av[i]] = me;
+    var sc = minimax(b, me, opp, 0);
+    b[av[i]] = null;
+    if (sc > best) { best = sc; bestIdx = av[i]; }
+  }
+  return bestIdx;
+}
+
+function aiMove() {
+  if (GS.phase !== 'playing' || GS.turn !== 'p2' || GS.gameOverFlag) return;
+  var idx = bestMove(GS.board, 'O');
+  if (idx < 0) return;
+  makeMove(idx);
+}
+
+// ============ ROUND FLOW ============
+function buildRoundParams() {
+  var round = GS.round + 1;
+  var wildcard = (round % 3 === 0) ? pickWildcard() : null;
+  var golden = (Math.random() < 0.2) ? Math.floor(Math.random() * 9) : -1;
+  var locked = [];
+  if (wildcard === 'lock') {
+    var pool = [];
+    for (var i = 0; i < 9; i++) if (i !== golden) pool.push(i);
+    shuffleArr(pool);
+    locked = [pool[0], pool[1]];
+  }
+  return {
+    round: round,
+    wildcard: wildcard,
+    golden: golden,
+    locked: locked,
+    starter: GS.starter
+  };
+}
+
+function hostStartRound() {
+  if (GS.gameOverFlag) return;
+  var p = buildRoundParams();
+  applyRound(p);
+  if (GS.mode === 'online' && GS.isHost) {
+    sendMsg({ type: 'newRound', params: p });
+  }
+}
+
+function applyRound(p) {
+  GS.round = p.round;
+  GS.wildcard = p.wildcard || null;
+  GS.goldenCell = (typeof p.golden === 'number') ? p.golden : -1;
+  GS.lockedCells = p.locked || [];
+  GS.starter = p.starter || 'p1';
+  GS.board = [null, null, null, null, null, null, null, null, null];
+  GS.turn = GS.starter;
+  GS.phase = 'playing';
+
+  updateBoardUI();
+  updateHUD();
+
+  var m;
+  if (p.wildcard === 'speed') m = '⚡ حالت سرعت! (زمان کم)';
+  else if (p.wildcard === 'bonus') m = '💎 جایزه!';
+  else if (p.wildcard === 'lock') m = '🔒 دو خانه قفل شد!';
+  else m = 'دست ' + GS.round + ' — شروع!';
+
+  if (GS.goldenCell >= 0) m += '  ✨خانه طلایی';
+
+  msgEl.textContent = m;
+  msgEl.className = 'message info';
+  msgEl.style.color = p.wildcard ? '#bb86fc' : '';
+
+  if (p.wildcard) S.golden();
+
+  setTimeout(function() {
+    if (GS.gameOverFlag || GS.phase !== 'playing') return;
+    if (GS.mode === 'solo' && GS.turn === 'p2') {
+      setTimeout(aiMove, 550);
+    } else {
+      startTimer();
+    }
+  }, 700);
+}
+
+function roundEnd(winner, line) {
+  if (GS.phase !== 'playing') return;
+  GS.phase = 'roundover';
+  stopTimer();
+
+  if (line) {
+    for (var k = 0; k < line.length; k++) {
+      if (GS.cellEls[line[k]]) GS.cellEls[line[k]].classList.add('win');
+    }
+  }
+
+  if (winner) {
+    GS.scores[winner]++;
+    GS.combos[winner] = (GS.combos[winner] || 0) + 1;
+    GS.combos[winner === 'p1' ? 'p2' : 'p1'] = 0;
+
+    var mySide = (GS.mode === 'online') ? GS.myRole : 'p1';
+    var iWon = (GS.mode === 'solo') ? (winner === 'p1') : (winner === mySide);
+
+    if (iWon) {
+      S.correct();
+      var c = GS.combos[winner];
+      if (c === 3) showCombo('🔥 3 دست پیاپی!');
+      else if (c === 4) showCombo('⚡ 4 دست پیاپی!');
+      else if (c === 5) showCombo('💥 UNSTOPPABLE!');
+    } else {
+      S.wrong();
+    }
+
+    var winSym = (winner === 'p1') ? 'X' : 'O';
+    if (GS.goldenCell >= 0 && GS.board[GS.goldenCell] === winSym) {
+      var cEl = GS.cellEls[GS.goldenCell];
+      if (cEl) {
+        var r = cEl.getBoundingClientRect();
+        spawnParticles(r.left + r.width / 2, r.top + r.height / 2, 35, ['#ffeb3b', '#ffb74d', '#fff59d']);
+      }
+      S.golden();
+      msgEl.textContent = '✨ برد با خانه طلایی!';
+      msgEl.className = 'message info';
+      msgEl.style.color = '#ffeb3b';
+    } else {
+      msgEl.textContent = (winner === 'p1') ? '❌ برنده این دست!' : '⭕ برنده این دست!';
+      msgEl.className = iWon ? 'message correct' : 'message wrong';
+      msgEl.style.color = '';
+    }
+
+    var scoreEl = $(winner === 'p1' ? 'p1ScoreVal' : 'p2ScoreVal');
+    scoreEl.classList.add('pop');
+    setTimeout(function() { scoreEl.classList.remove('pop'); }, 500);
+
+  } else {
+    GS.combos.p1 = 0; GS.combos.p2 = 0;
+    msgEl.textContent = '🤝 مساوی!';
+    msgEl.className = 'message info';
+    msgEl.style.color = '';
+  }
+
+  updateHUD();
+
+  var over = (GS.scores.p1 >= GS.targetScore || GS.scores.p2 >= GS.targetScore);
+  if (over) {
+    var w = (GS.scores.p1 >= GS.targetScore) ? 'p1' : 'p2';
+    setTimeout(function() { endGame(w); }, 1700);
+    return;
+  }
+
+  GS.starter = (GS.starter === 'p1') ? 'p2' : 'p1';
+
+  if (GS.mode === 'online') {
+    if (GS.isHost) setTimeout(hostStartRound, 2300);
+  } else {
+    setTimeout(hostStartRound, 2300);
+  }
+}
+
+// ============ END GAME ============
+function endGame(winner) {
+  stopTimer();
+  GS.gameOverFlag = true;
+  GS.phase = 'idle';
+  updateHUD();
+
+  var iWon;
+  if (GS.mode === 'local') iWon = true;
+  else if (GS.mode === 'solo') iWon = (winner === 'p1');
+  else iWon = (winner === GS.myRole);
+
+  if (GS.mode === 'local') {
+    $('resultTitle').textContent = (winner === 'p1' ? '❌ بازیکن ۱ برنده!' : '⭕ بازیکن ۲ برنده!');
+    $('trophy').textContent = '🏆'; S.win();
+  } else if (iWon) {
+    $('resultTitle').textContent = '🏆 بردی!';
+    $('trophy').textContent = '🏆'; S.win();
+  } else {
+    $('resultTitle').textContent = '💀 باختی...';
+    $('trophy').textContent = '💀'; S.lose();
+  }
+  $('resultTitle').style.color = iWon ? '#ffb74d' : '#ff6b6b';
+
+  if (iWon) spawnConfetti(80);
+
+  if (GS.mode === 'local') {
+    $('resultText').innerHTML = '❌ بازیکن ۱: ' + GS.scores.p1 + '<br>⭕ بازیکن ۲: ' + GS.scores.p2;
+  } else if (GS.mode === 'solo') {
+    $('resultText').innerHTML = '❌ امتیاز شما: ' + GS.scores.p1 + '<br>⭕ کامپیوتر: ' + GS.scores.p2;
+  } else {
+    var myScore = GS.scores[GS.myRole];
+    var oppScore = GS.scores[GS.myRole === 'p1' ? 'p2' : 'p1'];
+    $('resultText').innerHTML = '❌ امتیاز شما: ' + myScore + '<br>⭕ امتیاز حریف: ' + oppScore;
+  }
+
+  if (GS.mode === 'online' && GS.isHost) {
+    sendMsg({ type: 'gameover', winner: winner, scores: GS.scores });
+  }
+
+  setTimeout(function() { showScreen('resultScreen'); }, 2200);
+}
+
+// ============ WEBRTC ============
+var ICE_CONFIG = {
+  iceServers: [
+    { urls: 'stun:stun.l.google.com:19302' },
+    { urls: 'stun:stun1.l.google.com:19302' },
+    { urls: 'stun:stun.cloudflare.com:3478' },
+    { urls: 'turn:openrelay.metered.ca:80', username: 'openrelayproject', credential: 'openrelayproject' },
+    { urls: 'turn:openrelay.metered.ca:443', username: 'openrelayproject', credential: 'openrelayproject' },
+    { urls: 'turn:openrelay.metered.ca:443?transport=tcp', username: 'openrelayproject', credential: 'openrelayproject' }
+  ],
+  iceCandidatePoolSize: 10
+};
+
+function setupHost() {
+  GS.mode = 'online'; GS.isHost = true; GS.myRole = 'p1';
+  GS.oppName = 'حریف';
+  showScreen('lobbyScreen');
+  $('hostView').style.display = 'block';
+  $('guestView').style.display = 'none';
+  $('lobbyTitle').textContent = '🎮 اتاق میزبان';
+  $('hostStatus').textContent = 'در حال ساخت کد...';
+  $('hostStatus').className = 'status';
+  try { GS.pc = new RTCPeerConnection(ICE_CONFIG); }
+  catch(e) { $('hostStatus').textContent = '❌ مرورگر پشتیبانی نمی‌کند'; return; }
+
+  GS.dc = GS.pc.createDataChannel('game');
+  GS.dc.onopen = function() {
+    $('hostStatus').textContent = '✅ وصل شد!';
+    $('hostStatus').className = 'status ok';
+    toast('اتصال برقرار شد! 🎉', 'ok');
+    sendMsg({ type: 'hello', name: 'میزبان', avatar: '👤' });
+    setTimeout(startOnlineGame, 800);
+  };
+  GS.dc.onmessage = function(e) { try { handleMsg(JSON.parse(e.data)); } catch(err) { console.error(err); } };
+  GS.dc.onclose = function() { toast('حریف قطع شد', 'err'); };
+
+  GS.pc.createOffer().then(function(o) { return GS.pc.setLocalDescription(o); })
+    .then(function() {
+      waitForIce(GS.pc, function() {
+        var sdp = GS.pc.localDescription.sdp;
+        $('offerCode').value = btoa(unescape(encodeURIComponent(sdp)));
+        $('hostStatus').textContent = '✅ کد آماده!';
+        $('hostStatus').className = 'status ok';
+      });
+    }).catch(function(e) { $('hostStatus').textContent = '❌ ' + e.message; });
+}
+
+function waitForIce(pc, cb) {
+  if (pc.iceGatheringState === 'complete') { cb(); return; }
+  var done = false;
+  var timeout = setTimeout(function() { if (!done) { done = true; cb(); } }, 5000);
+  pc.onicegatheringstatechange = function() {
+    if (pc.iceGatheringState === 'complete' && !done) { done = true; clearTimeout(timeout); cb(); }
+  };
+}
+
+function processAnswer() {
+  var code = $('answerInput').value.trim();
+  if (!code) { toast('کد پاسخ خالیه!', 'err'); return; }
+  try {
+    var sdp = decodeURIComponent(escape(atob(code)));
+    GS.pc.setRemoteDescription(new RTCSessionDescription({ type: 'answer', sdp: sdp }))
+      .then(function() {
+        $('hostStatus').textContent = '✅ کد پردازش شد، منتظر اتصال...';
+        $('hostStatus').className = 'status ok';
+      }).catch(function(e) { $('hostStatus').textContent = '❌ ' + e.message; });
+  } catch(e) { $('hostStatus').textContent = '❌ کد نامعتبره'; }
+}
+
+function setupGuest() {
+  GS.mode = 'online'; GS.isHost = false; GS.myRole = 'p2';
+  GS.oppName = 'میزبان';
+  showScreen('lobbyScreen');
+  $('hostView').style.display = 'none';
+  $('guestView').style.display = 'block';
+  $('lobbyTitle').textContent = '🚪 ورود';
+  try { GS.pc = new RTCPeerConnection(ICE_CONFIG); }
+  catch(e) { $('guestStatus').textContent = '❌ مرورگر پشتیبانی نمی‌کند'; return; }
+
+  GS.pc.ondatachannel = function(e) {
+    GS.dc = e.channel;
+    GS.dc.onopen = function() {
+      $('guestStatus').textContent = '✅ وصل شد!';
+      $('guestStatus').className = 'status ok';
+      toast('اتصال برقرار شد! 🎉', 'ok');
+      sendMsg({ type: 'hello', name: 'مهمان', avatar: '👤' });
+      setTimeout(startOnlineGame, 800);
+    };
+    GS.dc.onmessage = function(ev) { try { handleMsg(JSON.parse(ev.data)); } catch(err) { console.error(err); } };
+    GS.dc.onclose = function() { toast('میزبان قطع شد', 'err'); };
+  };
+  $('guestStatus').textContent = 'منتظر کد...';
+}
+
+function processOffer() {
+  var code = $('offerInput').value.trim();
+  if (!code) { toast('کد خالیه!', 'err'); return; }
+  $('guestStatus').textContent = 'در حال پردازش...';
+  try {
+    var sdp = decodeURIComponent(escape(atob(code)));
+    GS.pc.setRemoteDescription(new RTCSessionDescription({ type: 'offer', sdp: sdp }))
+      .then(function() { return GS.pc.createAnswer(); })
+      .then(function(a) { return GS.pc.setLocalDescription(a); })
+      .then(function() {
+        waitForIce(GS.pc, function() {
+          $('answerCode').value = btoa(unescape(encodeURIComponent(GS.pc.localDescription.sdp)));
+          $('answerBox').style.display = 'block';
+          $('guestStatus').textContent = '✅ کد پاسخ آماده!';
+          $('guestStatus').className = 'status ok';
+        });
+      }).catch(function(e) { $('guestStatus').textContent = '❌ ' + e.message; });
+  } catch(e) { $('guestStatus').textContent = '❌ کد نامعتبره'; }
+}
+
+function sendMsg(obj) {
+  if (GS.dc && GS.dc.readyState === 'open') {
+    try { GS.dc.send(JSON.stringify(obj)); } catch(e) {}
+  }
+}
+
+function handleMsg(msg) {
+  if (msg.type === 'hello') {
+    GS.oppName = msg.name || 'حریف';
+    GS.oppAvatar = msg.avatar || '👤';
+    updateHUD();
+
+  } else if (msg.type === 'move') {
+    if (GS.phase !== 'playing' || GS.gameOverFlag) return;
+    var i = msg.index;
+    if (typeof i !== 'number' || GS.board[i] || GS.lockedCells.indexOf(i) !== -1) return;
+    stopTimer();
+    var sym = (msg.by === 'p1') ? 'X' : 'O';
+    GS.board[i] = sym;
+    paintCell(i, sym);
+    S.place();
+
+    var w = winnerOf(GS.board);
+    if (w) { roundEnd(msg.by, w.line); return; }
+    if (isFull(GS.board)) { roundEnd(null, null); return; }
+
+    GS.turn = (msg.by === 'p1') ? 'p2' : 'p1';
+    updateHUD();
+    afterTurn();
+
+  } else if (msg.type === 'newRound') {
+    if (GS.gameOverFlag) return;
+    applyRound(msg.params);
+
+  } else if (msg.type === 'gameover') {
+    GS.scores = msg.scores;
+    endGame(msg.winner);
+
+  } else if (msg.type === 'rematch') {
+    resetGame();
+    showScreen('gameScreen');
+    renderBoard();
+    updateHUD();
+    msgEl.textContent = 'منتظر شروع...';
+    msgEl.className = 'message info';
+
+  } else if (msg.type === 'emoji') {
+    spawnFloatingEmoji(msg.emoji, GS.isHost ? 'right' : 'left');
+  }
+}
+
+// ============ START MODES ============
+function resetGame() {
+  GS.board = [null, null, null, null, null, null, null, null, null];
+  GS.scores = { p1: 0, p2: 0 };
+  GS.combos = { p1: 0, p2: 0 };
+  GS.round = 0;
+  GS.starter = 'p1';
+  GS.turn = 'p1';
+  GS.phase = 'idle';
+  GS.gameOverFlag = false;
+  GS.wildcard = null;
+  GS.lockedCells = [];
+  GS.goldenCell = -1;
+  stopTimer();
+  msgEl.textContent = '';
+  msgEl.className = 'message';
+  msgEl.style.color = '';
+}
+
+function startOnlineGame() {
+  resetGame();
+  showScreen('gameScreen');
+  renderBoard();
+  updateHUD();
+  if (GS.isHost) {
+    GS.starter = 'p1';
+    setTimeout(hostStartRound, 700);
+  } else {
+    msgEl.textContent = 'منتظر شروع از طرف میزبان...';
+    msgEl.className = 'message info';
+  }
+}
+
+function startSolo() {
+  GS.mode = 'solo'; GS.myRole = 'p1'; GS.isHost = true;
+  GS.targetScore = 3;
+  resetGame();
+  showScreen('gameScreen');
+  renderBoard();
+  updateHUD();
+  GS.starter = 'p1';
+  setTimeout(hostStartRound, 500);
+}
+
+function startLocal() {
+  GS.mode = 'local'; GS.isHost = true; GS.myRole = 'p1';
+  GS.targetScore = 3;
+  resetGame();
+  showScreen('gameScreen');
+  renderBoard();
+  updateHUD();
+  GS.starter = 'p1';
+  setTimeout(hostStartRound, 500);
+}
+
+// ============ EVENTS ============
+$('soloBtn').onclick = function() { initAudio(); startSolo(); };
+$('localBtn').onclick = function() { initAudio(); startLocal(); };
+$('hostBtn').onclick = function() { initAudio(); setupHost(); };
+$('joinBtn').onclick = function() { initAudio(); setupGuest(); };
+$('processAnswerBtn').onclick = processAnswer;
+$('processOfferBtn').onclick = processOffer;
+
+$('copyOfferBtn').onclick = function() {
+  var t = $('offerCode'); t.select();
+  try { document.execCommand('copy'); toast('کپی شد! 📋', 'ok'); }
+  catch(e) { toast('دستی کپی کن', 'err'); }
+};
+$('copyAnswerBtn').onclick = function() {
+  var t = $('answerCode'); t.select();
+  try { document.execCommand('copy'); toast('کپی شد! 📋', 'ok'); }
+  catch(e) { toast('دستی کپی کن', 'err'); }
+};
+
+$('cancelLobbyBtn').onclick = function() {
+  if (GS.pc) { try { GS.pc.close(); } catch(e) {} GS.pc = null; }
+  GS.dc = null;
+  showScreen('menuScreen');
+};
+
+$('againBtn').onclick = function() {
+  if (GS.mode === 'solo') startSolo();
+  else if (GS.mode === 'local') startLocal();
+  else if (GS.mode === 'online' && GS.isHost) {
+    resetGame();
+    showScreen('gameScreen');
+    renderBoard();
+    updateHUD();
+    GS.starter = 'p1';
+    sendMsg({ type: 'rematch' });
+    setTimeout(hostStartRound, 600);
+  } else if (GS.mode === 'online' && !GS.isHost) {
+    resetGame();
+    showScreen('gameScreen');
+    renderBoard();
+    updateHUD();
+    msgEl.textContent = 'منتظر شروع از طرف میزبان...';
+    msgEl.className = 'message info';
+  }
+};
+
+$('menuBtn').onclick = function() {
+  if (GS.pc) { try { GS.pc.close(); } catch(e) {} GS.pc = null; }
+  GS.dc = null;
+  GS.gameOverFlag = true;
+  GS.phase = 'idle';
+  stopTimer();
+  showScreen('menuScreen');
+};
+
+document.querySelectorAll('.emoji-btn').forEach(function(btn) {
+  btn.onclick = function() {
+    var e = btn.dataset.e;
+    spawnFloatingEmoji(e, 'left');
+    if (GS.mode === 'online' && GS.dc) sendMsg({ type: 'emoji', emoji: e });
+  };
+});
+
+// ============ INIT ============
+showScreen('menuScreen');
+console.log('❌⭕ دوز ULTIMATE آماده!');
+</script>
+</body>
+</html>
